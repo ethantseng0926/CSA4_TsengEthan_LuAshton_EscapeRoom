@@ -227,6 +227,16 @@ public class GameGUI extends JComponent
 }
     
         
+  /**
+   * Check for a trap at the specified offset from the player's current position
+   *
+   * <P>
+   * precondition: newx and newy must be the amount a player regularly moves, otherwise an existing trap may go undetected
+   * <P>
+   * @param newx a location indicating the space to the right or left of the player
+   * @param newy a location indicating the space above or below the player
+   * @return true if the specified location has a trap that has not been sprung, false otherwise
+   */
   public boolean isTrap(int newx, int newy)
   {
     double px = playerLoc.getX() + newx;
@@ -234,11 +244,10 @@ public class GameGUI extends JComponent
 
     for (Rectangle r: traps)
     {
-      // DEBUG: System.out.println("trapx:" + r.getX() + " trapy:" + r.getY() + "\npx: " + px + " py:" + py);
       // zero size traps have already been sprung, ignore
       if (r.getWidth() > 0)
       {
-        // if new location of player has a trap, return true
+        // if specified location has a trap, return true
         if (r.contains(px, py))
         {
           return true;
@@ -250,8 +259,8 @@ public class GameGUI extends JComponent
   }
 
   /**
-   * Spring the trap. Traps can only be sprung once and attempts to spring
-   * a sprung task results in a penalty.
+   * Spring the trap at the specified offset from the player's current position. 
+   * Traps can only be sprung once and attempts to spring a sprung trap results in a penalty.
    * <P>
    * precondition: newx and newy must be the amount a player regularly moves, otherwise an existing trap may go unsprung
    * <P>
@@ -267,7 +276,6 @@ public class GameGUI extends JComponent
     // check all traps, some of which may be already sprung
     for (Rectangle r: traps)
     {
-      // DEBUG: System.out.println("trapx:" + r.getX() + " trapy:" + r.getY() + "\npx: " + px + " py:" + py);
       if (r.contains(px, py))
       {
         // zero size traps indicate it has been sprung, cannot spring again, so ignore
@@ -275,13 +283,13 @@ public class GameGUI extends JComponent
         {
           r.setSize(0,0);
           System.out.println("TRAP IS SPRUNG!");
-          return trapVal;
+          return 5; // Return positive points for successfully removing a trap
         }
       }
     }
     // no trap here, penalty
     System.out.println("THERE IS NO TRAP HERE TO SPRING");
-    return -trapVal;
+    return -5;
   }
 
   /**
