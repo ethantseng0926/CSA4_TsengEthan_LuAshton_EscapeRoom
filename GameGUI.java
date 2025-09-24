@@ -191,6 +191,64 @@ public class GameGUI extends JComponent
   }
 
   /**
+   * Check if player can jump in the specified direction (no wall in the jump path)
+   * <P>
+   * @param incrx amount to check in x direction
+   * @param incry amount to check in y direction
+   * @return true if jump is possible, false if wall is in the way
+   */
+  public boolean canJump(int incrx, int incry)
+  {
+      int jumpX = x + incrx;
+      int jumpY = y + incry;
+      int newX = x + 2*incrx;
+      int newY = y + 2*incry;
+
+      // check if jump would go off grid
+      if ( (newX < 0 || newX > WIDTH-SPACE_SIZE) || (newY < 0 || newY > HEIGHT-SPACE_SIZE) )
+      {
+        return false;
+      }
+
+      // determine if a wall is in the jump path
+      for (Rectangle r: walls)
+      {
+        int startX =  (int)r.getX();
+        int endX  =  (int)r.getX() + (int)r.getWidth();
+        int startY =  (int)r.getY();
+        int endY = (int) r.getY() + (int)r.getHeight();
+
+        // Check both the jump-over space and landing space for walls
+        if ((incrx > 0) && (
+            (x <= startX && startX <= jumpX && y >= startY && y <= endY) ||
+            (x <= startX && startX <= newX && y >= startY && y <= endY)))
+        {
+          return false;
+        }
+        else if ((incrx < 0) && (
+            (x >= startX && startX >= jumpX && y >= startY && y <= endY) ||
+            (x >= startX && startX >= newX && y >= startY && y <= endY)))
+        {
+          return false;
+        }
+        else if ((incry > 0) && (
+            (y <= startY && startY <= jumpY && x >= startX && x <= endX) ||
+            (y <= startY && startY <= newY && x >= startX && x <= endX)))
+        {
+          return false;
+        }
+        else if ((incry < 0) && (
+            (y >= startY && startY >= jumpY && x >= startX && x <= endX) ||
+            (y >= startY && startY >= newY && x >= startX && x <= endX)))
+        {
+          return false;
+        }     
+      }
+
+      return true;
+  }
+
+  /**
    * Check for a trap where the player will land
    *
    * <P>
@@ -204,7 +262,6 @@ public class GameGUI extends JComponent
   {
     double px = playerLoc.getX() + newx;
     double py = playerLoc.getY() + newy;
-
 
     for (Rectangle r: traps)
     {
@@ -338,7 +395,6 @@ public class GameGUI extends JComponent
    */
   public int replay()
   {
-
     int win = playerAtEnd();
   
     // resize prizes and traps to "reactivate" them
@@ -367,6 +423,29 @@ public class GameGUI extends JComponent
     setVisible(false);
     frame.dispose();
     return win;
+  }
+
+  /**
+   * Check if player is at the end (far right wall)
+   * <P>
+   * @return positive score for reaching the far right wall, penalty otherwise
+   */
+  public int playerAtEnd() 
+  {
+    int score;
+
+    double px = playerLoc.getX();
+    if (px > (WIDTH - 2*SPACE_SIZE))
+    {
+      System.out.println("YOU MADE IT!");
+      score = endVal;
+    }
+    else
+    {
+      System.out.println("OOPS, YOU QUIT TOO SOON!");
+      score = -endVal;
+    }
+    return score;
   }
 
   /*------------------- public methods not to be called as part of API -------------------*/
@@ -478,28 +557,5 @@ public class GameGUI extends JComponent
        }
        walls[numWalls] = r;
      }
-  }
-
-  /**
-   * Checks if player as at the far right of the board 
-   * @return positive score for reaching the far right wall, penalty otherwise
-   */
-  private int playerAtEnd() 
-  {
-    int score;
-
-    double px = playerLoc.getX();
-    if (px > (WIDTH - 2*SPACE_SIZE))
-    {
-      System.out.println("YOU MADE IT!");
-      score = endVal;
-    }
-    else
-    {
-      System.out.println("OOPS, YOU QUIT TOO SOON!");
-      score = -endVal;
-    }
-    return score;
-  
   }
 }
