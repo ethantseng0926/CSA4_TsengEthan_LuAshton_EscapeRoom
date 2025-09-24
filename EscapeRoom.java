@@ -287,16 +287,16 @@ public class EscapeRoom
       }
       
       // Check lose condition (trapped with negative score or time up)
-      if (score < -20 || timeUp) {
-        gameLost = true;
-        play = false;
-        if (timeUp) {
-          System.out.println("Time's up! You failed to escape in time.");
-        } else {
-          System.out.println("Game Over! You have had way too many penalties.");
-        }
-      }
-      
+// Check lose condition (time up or too many penalties)
+if (timeUp) {
+    gameLost = true;
+    play = false;
+    System.out.println("Time's up! You failed to escape in time.");
+} else if (score < -20) {
+    gameLost = true;
+    play = false;
+    System.out.println("Game Over! You have had way too many penalties.");
+}
       // Check if player reached the end but doesn't have enough points
       if (game.playerAtEnd() > 0 && score < targetScore) {
         System.out.println("You reached the end, but you need " + (targetScore - score) + " more points to win!");
