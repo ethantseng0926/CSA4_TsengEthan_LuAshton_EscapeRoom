@@ -421,7 +421,7 @@ public int pickupPrize()
     }
     else
     {
-      System.out.println("OOPS, YOU QUIT TOO SOON!");
+      System.out.println("Keep on going!");
       score = -endVal;
     }
     return score;
