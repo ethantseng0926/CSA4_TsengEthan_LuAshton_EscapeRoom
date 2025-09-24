@@ -97,7 +97,7 @@ public class EscapeRoom
       else if (input.equals("jr") || input.equals("jumpright")) {
         // Check if jump is possible (won't go off screen)
         if (game.canJump(m, 0)) {
-          result = game.jumpPlayer(2*m, 0);
+          result = game.jumpPlayer(1*m, 0);
           System.out.println("Jumped right over obstacles!");
         } else {
           result = -5; // Penalty for attempting jump off screen
@@ -106,7 +106,7 @@ public class EscapeRoom
       }
       else if (input.equals("jl") || input.equals("jumpleft")) {
         if (game.canJump(-m, 0)) {
-          result = game.jumpPlayer(-2*m, 0);
+          result = game.jumpPlayer(-1*m, 0);
           System.out.println("Jumped left over obstacles!");
         } else {
           result = -5;
@@ -115,7 +115,7 @@ public class EscapeRoom
       }
       else if (input.equals("ju") || input.equals("jumpup")) {
         if (game.canJump(0, -m)) {
-          result = game.jumpPlayer(0, -2*m);
+          result = game.jumpPlayer(0, -1*m);
           System.out.println("Jumped up over obstacles!");
         } else {
           result = -5;
@@ -124,7 +124,7 @@ public class EscapeRoom
       }
       else if (input.equals("jd") || input.equals("jumpdown")) {
         if (game.canJump(0, m)) {
-          result = game.jumpPlayer(0, 2*m);
+          result = game.jumpPlayer(0, 1*m);
           System.out.println("Jumped down over obstacles!");
         } else {
           result = -5;
