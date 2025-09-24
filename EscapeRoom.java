@@ -93,42 +93,42 @@ public class EscapeRoom
           System.out.println("Cannot move down! Penalty applied.");
         }
       }
-      // Jump commands
+      // Jump commands - now can jump over walls but not off screen
       else if (input.equals("jr") || input.equals("jumpright")) {
-        // Check if jump is possible (no wall in the way)
+        // Check if jump is possible (won't go off screen)
         if (game.canJump(m, 0)) {
-          result = game.movePlayer(2*m, 0);
-          System.out.println("Jumped right!");
+          result = game.jumpPlayer(2*m, 0);
+          System.out.println("Jumped right over obstacles!");
         } else {
-          result = -5; // Penalty for attempting impossible jump
-          System.out.println("Cannot jump right! Wall in the way. Penalty applied.");
+          result = -5; // Penalty for attempting jump off screen
+          System.out.println("Cannot jump right! Would go off screen. Penalty applied.");
         }
       }
       else if (input.equals("jl") || input.equals("jumpleft")) {
         if (game.canJump(-m, 0)) {
-          result = game.movePlayer(-2*m, 0);
-          System.out.println("Jumped left!");
+          result = game.jumpPlayer(-2*m, 0);
+          System.out.println("Jumped left over obstacles!");
         } else {
           result = -5;
-          System.out.println("Cannot jump left! Wall in the way. Penalty applied.");
+          System.out.println("Cannot jump left! Would go off screen. Penalty applied.");
         }
       }
       else if (input.equals("ju") || input.equals("jumpup")) {
         if (game.canJump(0, -m)) {
-          result = game.movePlayer(0, -2*m);
-          System.out.println("Jumped up!");
+          result = game.jumpPlayer(0, -2*m);
+          System.out.println("Jumped up over obstacles!");
         } else {
           result = -5;
-          System.out.println("Cannot jump up! Wall in the way. Penalty applied.");
+          System.out.println("Cannot jump up! Would go off screen. Penalty applied.");
         }
       }
       else if (input.equals("jd") || input.equals("jumpdown")) {
         if (game.canJump(0, m)) {
-          result = game.movePlayer(0, 2*m);
-          System.out.println("Jumped down!");
+          result = game.jumpPlayer(0, 2*m);
+          System.out.println("Jumped down over obstacles!");
         } else {
           result = -5;
-          System.out.println("Cannot jump down! Wall in the way. Penalty applied.");
+          System.out.println("Cannot jump down! Would go off screen. Penalty applied.");
         }
       }
       // Pick up prize
@@ -165,6 +165,7 @@ public class EscapeRoom
         System.out.println("Jump: jumpright(jr), jumpleft(jl), jumpup(ju), jumpdown(jd)");
         System.out.println("Actions: pickup(p), findtrap(ft), removetrap(rt)");
         System.out.println("Game: replay, quit(q)");
+        System.out.println("Note: Jumps can go over walls but not off screen!");
         result = 0;
       }
       // Replay
@@ -213,7 +214,7 @@ public class EscapeRoom
       if (score < -20) {
         gameLost = true;
         play = false;
-        System.out.println("Game Over! You've been trapped with too many penalties.");
+        System.out.println("Game Over! You have had way too many penalties.");
       }
       
       // Check if player reached the end but doesn't have enough points
