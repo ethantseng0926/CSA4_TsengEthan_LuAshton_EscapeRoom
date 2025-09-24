@@ -190,74 +190,43 @@ public class GameGUI extends JComponent
       return 0;   
   }
 
-  /**
-   * Check if player can jump in the specified direction (no wall in the jump path)
-   * <P>
-   * @param incrx amount to check in x direction
-   * @param incry amount to check in y direction
-   * @return true if jump is possible, false if wall is in the way
-   */
-  public boolean canJump(int incrx, int incry)
+  public int jumpPlayer(int incrx, int incry)
   {
-      int jumpX = x + incrx;
-      int jumpY = y + incry;
-      int newX = x + 2*incrx;
-      int newY = y + 2*incry;
+      int newX = x + incrx;
+      int newY = y + incry;
+      
+      // increment regardless of whether player really moves
+      playerSteps++;
 
-      // check if jump would go off grid
+      // check if off grid horizontally and vertically
       if ( (newX < 0 || newX > WIDTH-SPACE_SIZE) || (newY < 0 || newY > HEIGHT-SPACE_SIZE) )
       {
-        return false;
+        System.out.println ("OFF THE GRID!");
+        return -offGridVal;
       }
-
-      // determine if a wall is in the jump path
-      for (Rectangle r: walls)
-      {
-        int startX =  (int)r.getX();
-        int endX  =  (int)r.getX() + (int)r.getWidth();
-        int startY =  (int)r.getY();
-        int endY = (int) r.getY() + (int)r.getHeight();
-
-        // Check both the jump-over space and landing space for walls
-        if ((incrx > 0) && (
-            (x <= startX && startX <= jumpX && y >= startY && y <= endY) ||
-            (x <= startX && startX <= newX && y >= startY && y <= endY)))
-        {
-          return false;
-        }
-        else if ((incrx < 0) && (
-            (x >= startX && startX >= jumpX && y >= startY && y <= endY) ||
-            (x >= startX && startX >= newX && y >= startY && y <= endY)))
-        {
-          return false;
-        }
-        else if ((incry > 0) && (
-            (y <= startY && startY <= jumpY && x >= startX && x <= endX) ||
-            (y <= startY && startY <= newY && x >= startX && x <= endX)))
-        {
-          return false;
-        }
-        else if ((incry < 0) && (
-            (y >= startY && startY >= jumpY && x >= startX && x <= endX) ||
-            (y >= startY && startY >= newY && x >= startX && x <= endX)))
-        {
-          return false;
-        }     
-      }
-
-      return true;
+   
+      x += incrx;
+      y += incry;
+      repaint();   
+      return 0;   
   }
 
-  /**
-   * Check for a trap where the player will land
-   *
-   * <P>
-   * precondition: newx and newy must be the amount a player regularly moves, otherwise an existing trap may go undetected
-   * <P>
-   * @param newx a location indicating the space to the right or left of the player
-   * @param newy a location indicating the space above or below the player
-   * @return true if the new location has a trap that has not been sprung, false otherwise
-   */
+
+   public boolean canJump(int incrx, int incry)
+{
+    int newX = x + 2*incrx;
+    int newY = y + 2*incry;
+
+    // check if jump would go off grid (the only restriction)
+    if ( (newX < 0 || newX > WIDTH-SPACE_SIZE) || (newY < 0 || newY > HEIGHT-SPACE_SIZE) )
+    {
+        return false;
+    }
+
+    return true;
+}
+    
+        
   public boolean isTrap(int newx, int newy)
   {
     double px = playerLoc.getX() + newx;
@@ -320,26 +289,36 @@ public class GameGUI extends JComponent
    * <P>
    * @return positive score if a location had a prize to be picked up, otherwise a negative penalty
    */
-  public int pickupPrize()
-  {
-    double px = playerLoc.getX();
-    double py = playerLoc.getY();
+/**
+ * Pickup a prize and score points. If no prize is in that location, this results in a penalty.
+ * Spawns a new prize after picking one up.
+ * <P>
+ * @return positive score if a location had a prize to be picked up, otherwise a negative penalty
+ */
+public int pickupPrize()
+{
+  double px = playerLoc.getX();
+  double py = playerLoc.getY();
 
-    for (Rectangle p: prizes)
+  for (Rectangle p: prizes)
+  {
+    // DEBUG: System.out.println("prizex:" + p.getX() + " prizey:" + p.getY() + "\npx: " + px + " py:" + py);
+    // if location has a prize, pick it up
+    if (p.getWidth() > 0 && p.contains(px, py))
     {
-      // DEBUG: System.out.println("prizex:" + p.getX() + " prizey:" + p.getY() + "\npx: " + px + " py:" + py);
-      // if location has a prize, pick it up
-      if (p.getWidth() > 0 && p.contains(px, py))
-      {
-        System.out.println("YOU PICKED UP A PRIZE!");
-        p.setSize(0,0);
-        repaint();
-        return prizeVal;
-      }
+      System.out.println("YOU PICKED UP A PRIZE!");
+      p.setSize(0,0);
+      
+      // Spawn a new prize after picking one up
+      spawnPrize();
+      
+      repaint();
+      return prizeVal;
     }
-    System.out.println("OOPS, NO PRIZE HERE");
-    return -prizeVal;  
   }
+  System.out.println("OOPS, NO PRIZE HERE");
+  return -prizeVal;  
+}
 
   /**
    * Return the numbers of steps the player has taken.
@@ -497,20 +476,51 @@ public class GameGUI extends JComponent
    * Add randomly placed prizes to be picked up.
    * Note:  prizes and traps may occupy the same location, with traps hiding prizes
    */
-  private void createPrizes()
+/*
+ * Add randomly placed prizes to be picked up.
+ * Note:  prizes and traps may occupy the same location, with traps hiding prizes
+ */
+private void createPrizes()
+{
+  int s = SPACE_SIZE; 
+  Random rand = new Random();
+   for (int numPrizes = 0; numPrizes < totalPrizes; numPrizes++)
+   {
+    int h = rand.nextInt(GRID_H);
+    int w = rand.nextInt(GRID_W);
+
+    Rectangle r;
+    r = new Rectangle((w*s + 15),(h*s + 15), 15, 15);
+    prizes[numPrizes] = r;
+   }
+}
+
+/*
+ * Spawn a new prize at a random location when one is picked up
+ */
+private void spawnPrize()
+{
+  int s = SPACE_SIZE; 
+  Random rand = new Random();
+  
+  // Find an empty slot in the prizes array
+  for (int i = 0; i < prizes.length; i++)
   {
-    int s = SPACE_SIZE; 
-    Random rand = new Random();
-     for (int numPrizes = 0; numPrizes < totalPrizes; numPrizes++)
-     {
+    if (prizes[i].getWidth() == 0) // This prize has been picked up
+    {
       int h = rand.nextInt(GRID_H);
       int w = rand.nextInt(GRID_W);
 
       Rectangle r;
       r = new Rectangle((w*s + 15),(h*s + 15), 15, 15);
-      prizes[numPrizes] = r;
-     }
+      prizes[i] = r;
+      System.out.println("A new coin has spawned!");
+      break;
+    }
   }
+}
+
+
 
   /*
    * Add randomly placed traps to the board. They will be painted white and appear invisible.
