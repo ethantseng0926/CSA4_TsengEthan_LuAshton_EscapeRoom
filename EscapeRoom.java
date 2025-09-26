@@ -46,11 +46,13 @@ public class EscapeRoom
     int score = 0;
     boolean gameWon = false;
     boolean gameLost = false;
-    boolean timeUp = false;
     int targetScore = 30; // Score needed to win the game
     int timeLimit = 30; // 30 second timer
     int trapPenalty = 10; // Points lost when trapped
     long startTime = System.currentTimeMillis();
+
+    // Use array to bypass final requirement for timer
+    final boolean[] timeUpRef = {false};
 
     Scanner in = new Scanner(System.in);
     String[] validCommands = { "right", "left", "up", "down", "r", "l", "u", "d",
@@ -64,14 +66,14 @@ public class EscapeRoom
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
-        timeUp = true;
+        timeUpRef[0] = true;
         System.out.println("\nTIME'S UP! Game over!");
       }
     }, timeLimit * 1000);
   
     // set up game
     boolean play = true;
-    while (play && !timeUp)
+    while (play && !timeUpRef[0])
     {
       // Calculate remaining time
       long currentTime = System.currentTimeMillis();
@@ -250,7 +252,18 @@ public class EscapeRoom
         score = 0; // Reset score for new game
         gameWon = false;
         gameLost = false;
+        timeUpRef[0] = false; // Reset timer flag
         startTime = System.currentTimeMillis(); // Reset timer
+        timer.cancel(); // Cancel old timer
+        // Create new timer
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+          @Override
+          public void run() {
+            timeUpRef[0] = true;
+            System.out.println("\nTIME'S UP! Game over!");
+          }
+        }, timeLimit * 1000);
         System.out.println("Game reset! Starting new game.");
         continue;
       }
@@ -286,17 +299,17 @@ public class EscapeRoom
         System.out.println("Congratulations! You won the game!");
       }
       
-      // Check lose condition (trapped with negative score or time up)
-// Check lose condition (time up or too many penalties)
-if (timeUp) {
-    gameLost = true;
-    play = false;
-    System.out.println("Time's up! You failed to escape in time.");
-} else if (score < -20) {
-    gameLost = true;
-    play = false;
-    System.out.println("Game Over! You have had way too many penalties.");
-}
+      // Check lose condition (time up or too many penalties)
+      if (timeUpRef[0]) {
+        gameLost = true;
+        play = false;
+        System.out.println("Time's up! You failed to escape in time.");
+      } else if (score < -20) {
+        gameLost = true;
+        play = false;
+        System.out.println("Game Over! You have had way too many penalties.");
+      }
+      
       // Check if player reached the end but doesn't have enough points
       if (game.playerAtEnd() > 0 && score < targetScore) {
         System.out.println("You reached the end, but you need " + (targetScore - score) + " more points to win!");
@@ -309,7 +322,7 @@ if (timeUp) {
     // Cancel timer if game ended early
     timer.cancel();
 
-    if (!gameWon && !gameLost && !timeUp) {
+    if (!gameWon && !gameLost && !timeUpRef[0]) {
       score += game.endGame();
     }
 
@@ -320,7 +333,7 @@ if (timeUp) {
     if (gameWon) {
       System.out.println("You successfully escaped the room!");
     } else if (gameLost) {
-      if (timeUp) {
+      if (timeUpRef[0]) {
         System.out.println("You failed to escape within the time limit.");
       } else {
         System.out.println("You failed to escape the room.");
