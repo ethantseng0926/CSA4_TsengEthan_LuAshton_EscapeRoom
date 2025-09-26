@@ -47,7 +47,7 @@ public class EscapeRoom
     boolean gameWon = false;
     boolean gameLost = false;
     int targetScore = 30; // Score needed to win the game
-    int timeLimit = 30; // 30 second timer
+    int timeLimit = 60; // 60 second timer
     int trapPenalty = 10; // Points lost when trapped
     long startTime = System.currentTimeMillis();
 
